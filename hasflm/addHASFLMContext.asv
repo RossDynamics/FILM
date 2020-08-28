@@ -1,0 +1,14 @@
+function c = addHASFLMContext(c)
+%ADDHASFLMCONTEXT Sets up the HASFLM namespace of the context c with
+%default properties.
+
+%Creates the root namespace
+c.hasflm = struct;
+
+%Creates a settings namespace
+c.hasflm.s = struct;
+%The number of points to use when integrating trajectories
+c.hasflm.s.nPoints = 
+
+end
+
