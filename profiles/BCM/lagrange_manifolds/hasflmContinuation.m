@@ -2,16 +2,20 @@
 %Lagrange manifold.
 
 %Let's create a context for the known Lagrange manifold.
-%disp('Creating context with epsilonomega = 1e-1 (LM known)...');
-%cSet{1} = Earth_Moon_Sun_BCM_Context(1e-1);
+disp('Creating context with epsilonomega = 1e-1 (LM known)...');
+cSet{1} = Earth_Moon_Sun_BCM_Context(1e-1);
 
-%cSet{1} = cs(cSet{1},'lm.y0',[0.836688080819354   0.000000000000000  -0.000000000000002   0.000430728236819].');
+cSet{1} = cs(cSet{1},'lm2.y0',[1.1 0 0 0].');
 
-cSet{4} = Earth_Moon_Sun_BCM_Context(4e-1);
+%cSet{8} = Earth_Moon_Sun_BCM_Context(8e-1);
 
-cSet{4} = cs(cSet{4},'lm.y0',[0.836349913728578   0.000000037601371  -0.000000070846718   0.002605328602630].');
+%cSet{8} = cs(cSet{8},'lm.y0',[0.821153761674520  -0.000008162988573   0.000033569946083   0.143822404285661].');
 
-for i = 4:9
+%cSet{2} = Earth_Moon_Sun_BCM_Context(2e-1);
+
+%cSet{2} = cs(cSet{2},'lm.y0',[0.836616983019289   0.000000005805273   0.000000001075985   0.000996805459492].');
+
+for i = 1:9
     
     disp('Iteration:')
     disp(i)
@@ -38,6 +42,12 @@ for i = 4:9
     
     disp('Launching HASFLM...');
     
+    %We insert a singularity detection event function to stop trajectories
+    %before they get "stuck" next to a singularity.
+    mu = cg(cSet{i+1},'p.mu');
+    cSet{i+1} = cs(cSet{i+1},'s.i.odeopts',odeset('Events',...
+                        @(t,y)singularityEvent(t,y,mu,eigenbasis)));
+    
     cSet{i+1} = hasflm(getSolarPeriod(cSet{i+1}),cSet{i+1});
 
     while ~exist('HASFLM_y0')
@@ -46,5 +56,8 @@ for i = 4:9
     
     disp('Setting the new guess...')
     cSet{i+1} = cs(cSet{i+1},'lm.y0',HASFLM_y0);
+    
+    %We remove the singularity detector after HASFLM finishes.
+    cSet{i+1} = cs(cSet{i+1},'s.i.odeopts',odeset('Events',[]));
 
 end

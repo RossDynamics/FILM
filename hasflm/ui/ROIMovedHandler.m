@@ -16,7 +16,17 @@ y0 = getIC(roiSet);
 
 tspan = linspace(0,T,nPoints);
 sol = integ(tspan,y0,c);
-y = deval(sol,tspan);
+try
+    y = deval(sol,tspan);
+catch exception
+    %If an event function or something similar prematurely ends
+    %integration, we have to get what we can
+    if strcmp(exception.identifier,'MATLAB:deval:SolOutsideInterval')
+        tspan = linspace(0,sol.x(end),nPoints);
+        y = deval(sol,tspan);
+        disp('Unable to integrate over the full timespan required.')
+    end
+end
 
 %We now plot on each axis.
 for i = 1:nhalf

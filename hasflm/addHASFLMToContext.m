@@ -13,7 +13,7 @@ c.hasflm.s = struct;
 %The period of the desired periodic orbit; how long to integrate.
 c.hasflm.s.T = Property(T,0);
 %The number of points to use when integrating trajectories
-c.hasflm.s.nPoints = Property(100,0);
+c.hasflm.s.nPoints = Property(300,0);
 
 end
 

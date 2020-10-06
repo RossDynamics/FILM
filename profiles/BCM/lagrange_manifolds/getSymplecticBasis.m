@@ -20,8 +20,8 @@ eigvecs = eigvecs(:,sortorder);
 
 eigvecs = eigvecs .* sign(eigvecs(1,:))
 
-%We also exchange the two complex eigenvectors to be sure their signs
-%remain consistent.
+%We also exchange the two complex eigenvectors. Sometimes, the less-than
+%sign needs to be replaced with a greater-than sign or vice-versa.
 if eigvecs(2,3) < 0
     eigvecs = eigvecs(:,[1 3 2 4]);
 end

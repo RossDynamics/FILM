@@ -4,12 +4,17 @@
 %Let's set the eigenbasis first
 c = coordset(c,eigenbasis);
 
+%To consider initial conditions in the upper halfplane, set halfplane equal
+%to 1. To consider initial conditions in the lower halfplane, set
+%halfplane equal to -1.
+halfplane = 1;
+
 %We create an array of initial conditions from within the
 %symplectic eigenbasis along the bounding line. We set const (where p1 =
 %const + q1) small and h = H2(x) small.
 
-const = 4e-5;
-h = 1e-7;
+const = halfplane * 4e-5;
+h = 1e-6;
 
 %We also set a beginning for the array's q1's. This beginning coincides 
 %with the p1 + q1 = 0 line, so we have q1 = -const / 2.
@@ -21,12 +26,12 @@ q1 = -const / 2;
 %conditions become complex. We specify a small arrayStep for creating 
 %subsequent q2's.
 
-arrayStep = 1e-6;
+arrayStep = halfplane * 2e-6;
 
 %Now, we build the array using ics_energy_boundary:
 arrayics = ics_energy_boundary(q1,const,h,...
                                cg(c,'p.sigma'),cg(c,'p.a'),cg(c,'p.T'));
-                           
+                          
 while true
     q1 = q1 + arrayStep;
     ic = ics_energy_boundary(q1,const,h,...
@@ -38,6 +43,8 @@ while true
     arrayics = [arrayics ic];
 end
 
+size(arrayics) 
+
 disp('------------')
 disp('CONDITION 2:')
 disp('Last element of the initial conditions array''s q1*p1')
@@ -48,17 +55,22 @@ disp(h / (1/getSolarPeriod(c)*log(cg(c,'p.sigma'))));
 disp('------------')
 
 %We use eps instead of 0 because numbers that are almost zero may not be
-%treated as 0.
-c = cs(c,'lm.nontransit',arrayics(:,arrayics(1,:) < -eps));
-c = cs(c,'lm.transit',arrayics(:,arrayics(1,:) > eps));
+%treated as 0. We have to multiply by halfplane since the sign of transit
+%and nontransit initial conditions depends upon the current halfplane.
+c = cs(c,'lm.nontransit',arrayics(:,arrayics(1,:) * halfplane < -eps));
+c = cs(c,'lm.transit',arrayics(:,arrayics(1,:) * halfplane > eps));
 c = cs(c,'lm.manifold',arrayics(:,abs(arrayics(1,:)) < eps));
 
 %Let's plot the initial conditions in the symplectic eigenbasis's saddle
 %plane
 
-c = cs(c,'s.o.v.dmode','1');
-
 close all;
+
+disp('Running analyzeParabola...')
+analyzeParabola
+disp('analyzeParabola complete.')
+
+c = cs(c,'s.o.v.dmode','1');
 
 hold on
 limScale = 0.1;
@@ -68,6 +80,32 @@ cplot(cg(c,'lm.nontransit'),c,'or');
 cplot(cg(c,'lm.transit'),c,'og');
 cplot(cg(c,'lm.manifold'),c,'ob');
 
+periods = 1;
+timescale = periods * getSolarPeriod(c);
+numPts = 5;
+
+nontransitics = cg(c,'lm.nontransit');
+transitics = cg(c,'lm.transit');
+manifold = cg(c,'lm.manifold');
+
+%Now, we integrate. For speed, we enable caching.
+c = startCaching(c);
+
+for i = 1:size(nontransitics,2)
+    [~,c] = integplot(linspace(0,timescale,numPts),...
+                      nontransitics(:,i),c,'ro');
+end
+for i = 1:size(transitics,2)
+    [~,c] = integplot(linspace(0,timescale,numPts),...
+                      transitics(:,i),c,'go');
+end
+for i = 1:size(manifold,2)
+    [~,c] = integplot(linspace(0,timescale,numPts),...
+                      manifold(:,i),c,'bo');
+end
+
+c = stopCaching(c);
+
 c = cs(c,'s.o.v.dmode','position');
 
 %We have to reset the coordinate system for now.
@@ -76,26 +114,30 @@ c = coordreset(c);
 %Now, we integrate. For speed, we enable caching.
 c = startCaching(c);
 
-timescale = 7 * getSolarPeriod(c);
+timescale = 1 * getSolarPeriod(c);
 numPts = 1000;
 
 nontransitics = cg(c,'lm.nontransit');
 transitics = cg(c,'lm.transit');
 manifold = cg(c,'lm.manifold');
 
-figure
+integfig = figure
 hold on
 for i = 1:size(nontransitics,2)
-    [~,c] = integplot(linspace(0,timescale,numPts),...
+    [p,c] = integplot(linspace(0,timescale,numPts),...
                       nontransitics(:,i),c,'r');
-    [~,c] = integplot(linspace(0,-timescale,numPts),...
+    p.Color(4) = 0.25;
+    [p,c] = integplot(linspace(0,-timescale,numPts),...
                       nontransitics(:,i),c,'r');
+    p.Color(4) = 0.25;
 end
 for i = 1:size(transitics,2)
-    [~,c] = integplot(linspace(0,timescale,numPts),...
+    [p,c] = integplot(linspace(0,timescale,numPts),...
                       transitics(:,i),c,'g');
-    [~,c] = integplot(linspace(0,-timescale,numPts),...
+    p.Color(4) = 0.25;
+    [p,c] = integplot(linspace(0,-timescale,numPts),...
                       transitics(:,i),c,'g');
+    p.Color(4) = 0.25;
 end
 for i = 1:size(manifold,2)
     [~,c] = integplot(linspace(0,timescale,numPts),...
@@ -122,7 +164,7 @@ nontransitics = cg(c,'lm.nontransit');
 transitics = cg(c,'lm.transit');
 manifold = cg(c,'lm.manifold');
 
-periods = 2;
+periods = 1;
 timescale = periods * getSolarPeriod(c);
 numPts = periods + 1;
 
