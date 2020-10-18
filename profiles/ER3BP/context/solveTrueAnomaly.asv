@@ -1,0 +1,12 @@
+function c = solveTrueAnomaly(e,c)
+%SOLVETRUEANOMALY Solves the true anomaly differential equation and puts
+%the resulting solution structure in c. Use getTrueAnomaly to access the
+%true anomaly at a particular time.
+
+sol = integ([0 2*pi],y0,c,varargin);
+
+end
+
+function fdot = trueAnomalyFun(~,f)
+    fdot = ((1 + e*cos(f))^2)/((1-e^2)^(3/2));
+end
