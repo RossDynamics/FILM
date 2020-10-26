@@ -13,6 +13,7 @@ disp(cg(c,'lm.y0'))
 disp('Switching to momentum coordinates...')
 c = useMomentum(c);
 
+disp('Obtaining the monodromy matrix...')
 %We now obtain the monodromy matrix (the state transition matrix after one
 %period)
 stms = stm([0 getSolarPeriod(c)],cg(c,'lm.y0'),c);
