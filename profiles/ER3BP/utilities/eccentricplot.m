@@ -1,9 +1,9 @@
-clear all
+%clear all
 
 density = 50000;
 
 c = Context(4)
-c = cs(c,'p.e',0.99)
+c = cs(c,'p.e',0.0549006)
 c = cs(c,'p.f0',0)
 c = cs(c,'p.mu',0.012150581623434)
 c = solveTrueAnomaly(density,c)

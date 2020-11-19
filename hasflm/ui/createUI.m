@@ -1,10 +1,11 @@
-function [axisSet,roiSet,tolLabel] = createUI(c)
+function [axisSet,roiSet,tolLabel] = createUI(c,varargin)
 %CREATEUI Creates a HASFLM UI for the context object c. Returns cell arrays
 %containing the axes and roi points created. Also returns UI
-%elements.
+%elements. Will take initial conditions for phase space extensions as an
+%optional argument.
 
-%We need to know the phase space dimension so that we can know how many
-%axes to create
+%We need to know the unextended phase space dimension so that we can know 
+%how many axes to create
 n = cg(c,'d.n');
 
 close all;
@@ -37,7 +38,13 @@ set(gca,'visible','off')
 tb = axtoolbar(statusAxis);
 btn = axtoolbarbtn(tb,'push');
 btn.Tooltip = 'Get Initial Condition';
-btn.ButtonPushedFcn = @(~,~)assignin('base','HASFLM_y0',getIC(roiSet));
+if nargin >= 2
+    extendedy0 = varargin{1}; 
+else
+    extendedy0 = [];
+end
+btn.ButtonPushedFcn = @(~,~)assignin('base','HASFLM_y0',getIC(roiSet,...
+                                                        extendedy0));
 
 %We create the listeners in a separate loop so that we can provide the
 %entire axisSet, roiSet, and relevant UI elements to each listener.

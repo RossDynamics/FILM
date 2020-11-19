@@ -10,9 +10,13 @@ nhalf = numel(roiSet);
 
 T = cg(c,'hasflm.s.T');
 nPoints = cg(c,'hasflm.s.nPoints');
+extendedy0 = cg(c,'hasflm.s.extendedy0');
+%We intentionally get the unextended n.
+n = cg(c,'d.n');
 
-%We get y0 from all of the roi's on the axes
-y0 = getIC(roiSet);
+%We get y0 from all of the roi's on the axes and from any extension values
+%passed through
+y0 = getIC(roiSet,extendedy0);
 
 tspan = linspace(0,T,nPoints);
 sol = integ(tspan,y0,c);
@@ -46,8 +50,8 @@ for i = 1:nhalf
 end
 
 %We get the tolerance by calculating the distance between the start and end
-%points on the trajectory
-tolLabel.String = norm(y(:,1) - y(:,end));
+%points on the trajectory, not counting extended phase space points
+tolLabel.String = norm(y(1:n,1) - y(1:n,end));
 
 
 end
