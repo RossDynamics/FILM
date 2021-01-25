@@ -4,19 +4,11 @@
 %Let's set the eigenbasis first
 c = coordset(c,eigenbasis);
 
-%To consider initial conditions in the upper halfplane, set halfplane equal
-%to 1. To consider initial conditions in the lower halfplane, set
-%halfplane equal to -1.
-halfplane = 1;
-
-%We consider small h = H2(x).
-h = 1e-8;
-
 parabola = [];
 
 c = cs(c,'s.o.v.dmode','1');
 
-for i = logspace(-9,-2,200)
+for i = logspace(-9,-2,5000)
 
     %We create an array of initial conditions from within the
     %symplectic eigenbasis along the bounding line. We set const (where p1 =
@@ -34,16 +26,16 @@ for i = logspace(-9,-2,200)
     %conditions become complex. We specify a small arrayStep for creating 
     %subsequent q2's.
 
-    arrayStep = halfplane * 5e-7;
-
     %Now, we build the array using ics_energy_boundary:
-    arrayics = ics_energy_boundary(q1,const,h,...
-                                   cg(c,'p.sigma'),cg(c,'p.a'),cg(c,'p.T'));
+    arrayics = ics_energy_boundaryER3BP(q1,const,h,...
+                                   cg(c,'p.sigma'),cg(c,'p.a'),...
+                                   cg(c,'p.T'),newy0(5));
 
     while true
         q1 = q1 + arrayStep;
-        ic = ics_energy_boundary(q1,const,h,...
-                                   cg(c,'p.sigma'),cg(c,'p.a'),cg(c,'p.T'));
+        ic = ics_energy_boundaryER3BP(q1,const,h,...
+                                   cg(c,'p.sigma'),cg(c,'p.a'),...
+                                   cg(c,'p.T'),newy0(5));
         %If we get complex values, we know we've reached the boundary
         if ~isreal(ic)
             break;

@@ -1,4 +1,4 @@
-function ic = ics_energy_boundaryER3BP(q1,const,h,sigma,a,T)
+function ic = ics_energy_boundaryER3BP(q1,const,h,sigma,a,T,phase)
 %ICS_ALONG_LINE Given a set of relevant variables and q1, 
 %calculates the rest of the initial condition (assuming 
 %q_2 = p_2). Adds on an initial condition for the true anomaly.
@@ -21,7 +21,7 @@ ic = [q1
       q2
       p1
       p2
-      0];
+      phase];
 
 end
 

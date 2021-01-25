@@ -7,10 +7,10 @@ c = coordset(c,eigenbasis);
 %To consider initial conditions in the upper halfplane, set halfplane equal
 %to 1. To consider initial conditions in the lower halfplane, set
 %halfplane equal to -1.
-halfplane = 1;
+%halfplane = 1;
 
 %We consider small h = H2(x).
-h = 1e-7;
+%h = 1e-7;
 
 parabola = [];
 
@@ -34,7 +34,7 @@ for i = logspace(-9,-2,200)
     %conditions become complex. We specify a small arrayStep for creating 
     %subsequent q2's.
 
-    arrayStep = halfplane * 5e-7;
+    %arrayStep = halfplane * 5e-7;
 
     %Now, we build the array using ics_energy_boundary:
     arrayics = ics_energy_boundary(q1,const,h,...

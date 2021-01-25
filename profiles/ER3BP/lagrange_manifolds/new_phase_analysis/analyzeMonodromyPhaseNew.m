@@ -1,12 +1,12 @@
 %Obtains and performs some analysis on the monodromy matrix for the
-%Earth-Moon ER3BP.
+%Earth-Moon ER3BP at a specific phase.
 
 c = coordreset(c);
 
 %We set the initial condition for the Lagrange manifold
 %c = cs(c,'lm.y0',[0.836688080819354   0.000000000000000  -0.000000000000002   0.000430728236819].');
 disp('Lagrange manifold initial condition:')
-disp(cg(c,'lm.y0'))
+disp(cg(c,'temp.newy0'))
 
 disp('Switching to momentum coordinates...')
 c = useMomentum(c);
@@ -14,7 +14,7 @@ c = useMomentum(c);
 disp('Obtaining the monodromy matrix...')
 %We now obtain the monodromy matrix (the state transition matrix after one
 %period)
-stms = stm([0 2*pi],cg(c,'lm.y0'),c);
+stms = stm([newTime 2*pi+newTime],cg(c,'temp.newy0'),c);
 M = stms(1:4,1:4,2);
 c = cs(c,'lm.monodromy',M,2);
 Mfull = stms(:,:,2);
@@ -38,7 +38,7 @@ disp(eigenvals)
 disp('Eigenvectors of the monodromy matrix:')
 disp(eigenvecs)
 
-C = getSymplecticBasis(M);
+C = getSymplecticBasis(M,true);
 %Because C is a basis, we store it using transform type 0.
 c = cs(c,'lm.C',C,0);
 disp('Symplectic basis C:')
@@ -48,8 +48,9 @@ disp(C)
 disp('C'' * J * C =')
 disp(C' * Jmatrix(cg(c,'d.n')) * C)
 
+%We use transformType = 0 because we're in a different basis.
 disp('Switching origin to the Lagrange manifold initial condition...')
-c = cs(c,'ac.origin',cg(c,'lm.y0'));
+c = cs(c,'ac.origin',newy0,0);
 
 disp('Switching active basis to C...')
 c = cs(c,'ac.basis',cg(c,'lm.C'));

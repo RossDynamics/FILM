@@ -8,7 +8,7 @@ c = cs(c,'p.f0',0)
 c = cs(c,'p.mu',0.012150581623434)
 c = solveTrueAnomaly(density,c)
 sol = cg(c,'p.fsol')
-tspan = linspace(0,2*pi,density);
+tspan = linspace(0,pi/3,density);
 fhist = deval(sol,tspan);
 
 e = cg(c,'p.e');

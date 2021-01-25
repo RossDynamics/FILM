@@ -1,4 +1,4 @@
-function C = getSymplecticBasis(M)
+function C = getSymplecticBasis(M,varargin)
 %GETSYMPLECTICBASIS Attempts to find the symplectic eigenbasis C generated
 %from the eigensystem of a matrix (such as a monodromy matrix) M.
 

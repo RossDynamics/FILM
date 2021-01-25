@@ -30,12 +30,12 @@ arrayStep = halfplane * 1e-6;
 
 %Now, we build the array using ics_energy_boundary:
 arrayics = ics_energy_boundaryER3BP(q1,const,h,...
-                               cg(c,'p.sigma'),cg(c,'p.a'),cg(c,'p.T'));
+                               cg(c,'p.sigma'),cg(c,'p.a'),cg(c,'p.T'),0);
                           
 while true
     q1 = q1 + arrayStep;
     ic = ics_energy_boundaryER3BP(q1,const,h,...
-                               cg(c,'p.sigma'),cg(c,'p.a'),cg(c,'p.T'));
+                               cg(c,'p.sigma'),cg(c,'p.a'),cg(c,'p.T'),0);
     %If we get complex values, we know we've reached the boundary
     if ~isreal(ic)
         break;
@@ -50,9 +50,12 @@ disp('CONDITION 2:')
 disp('Last element of the initial conditions array''s q1*p1')
 disp(arrayics(1,end)*arrayics(3,end));
 
-disp('h/lambdatilde:')
-disp(h / (1/2*pi*log(cg(c,'p.sigma'))));
-disp('------------')
+% disp('h/lambdatilde:')
+% disp(h / (1/2*pi*log(cg(c,'p.sigma'))));
+% disp('------------')
+
+lambdatil = log(cg(c,'p.sigma'))/2*pi;
+fplot(@(q_1)h/(lambdatil*q_1))
 
 %We use eps instead of 0 because numbers that are almost zero may not be
 %treated as 0. We have to multiply by halfplane since the sign of transit
@@ -76,9 +79,8 @@ hold on
 limScale = 0.1;
 line([0 0], [-limScale limScale]);
 line([-limScale limScale], [0 0]);
-cplot(cg(c,'lm.nontransit'),c,'ob');
-cplot(cg(c,'lm.transit'),c,'oy');
-cplot(cg(c,'lm.manifold'),c,'or');
+cplot(cg(c,'lm.nontransit'),c,'.b');
+cplot(cg(c,'lm.transit'),c,'.r');
 
 periods = 1;
 timescale = periods * 2*pi;
@@ -86,28 +88,27 @@ numPts = 5;
 
 nontransitics = cg(c,'lm.nontransit');
 transitics = cg(c,'lm.transit');
-manifold = cg(c,'lm.manifold');
 
-%Now, we integrate. For speed, we enable caching.
-c = startCaching(c);
-
-for i = 1:size(nontransitics,2)
-    disp(i)
-    [~,c] = integplot(linspace(0,timescale,numPts),...
-                      nontransitics(:,i),c,'bo');
-end
-for i = 1:size(transitics,2)
-    disp(i)
-    [~,c] = integplot(linspace(0,timescale,numPts),...
-                      transitics(:,i),c,'yo');
-end
-for i = 1:size(manifold,2)
-    disp(i)
-    [~,c] = integplot(linspace(0,timescale,numPts),...
-                      manifold(:,i),c,'ro');
-end
-
-c = stopCaching(c);
+% %Now, we integrate. For speed, we enable caching.
+% c = startCaching(c);
+% 
+% for i = 1:size(nontransitics,2)
+%     disp(i)
+%     [~,c] = integplot(linspace(0,timescale,numPts),...
+%                       nontransitics(:,i),c,'co');
+% end
+% for i = 1:size(transitics,2)
+%     disp(i)
+%     [~,c] = integplot(linspace(0,timescale,numPts),...
+%                       transitics(:,i),c,'go');
+% end
+% for i = 1:size(manifold,2)
+%     disp(i)
+%     [~,c] = integplot(linspace(0,timescale,numPts),...
+%                       manifold(:,i),c,'ro');
+% end
+% 
+% c = stopCaching(c);
 
 c = cs(c,'s.o.v.dmode','position');
 
@@ -133,75 +134,70 @@ hold on
 for i = 1:size(nontransitics,2)
     [p,c] = integplot(linspace(0,timescale,numPts),...
                       nontransitics(:,i),c,'b');
-    p.Color(4) = 0.25;
+    p.Color(4) = 0.75;
     [p,c] = integplot(linspace(0,-timescale,numPts),...
                       nontransitics(:,i),c,'b');
-    p.Color(4) = 0.25;
+    p.Color(4) = 0.75;
 end
 for i = 1:size(transitics,2)
     [p,c] = integplot(linspace(0,timescale,numPts),...
-                      transitics(:,i),c,'y');
-    p.Color(4) = 0.25;
+                      transitics(:,i),c,'r');
+    p.Color(4) = 0.75;
     [p,c] = integplot(linspace(0,-timescale,numPts),...
-                      transitics(:,i),c,'y');
-    p.Color(4) = 0.25;
-end
-for i = 1:size(manifold,2)
-    [p,c] = integplot(linspace(0,timescale,numPts),...
-                      manifold(:,i),c,'r');
-    p.Color(4) = 0.25;              
-    [p,c] = integplot(linspace(0,-timescale,numPts),...
-                      manifold(:,i),c,'r');
-    p.Color(4) = 0.25;
+                      transitics(:,i),c,'r');
+    p.Color(4) = 0.75;
 end
 
 disp('CONDITION 1:')
 disp('Assess to see whether it holds visually.')
 disp('------------')
 
-%Now, we plot the trajectory energies. We have to move back to the
-%symplectic eigenbasis to do so, which in turn requires restarting the
-%cache.
-
 c = stopCaching(c);
 
-c = coordset(c,eigenbasis);
+drawnow
 
-c = startCaching(c);
-
-nontransitics = cg(c,'lm.nontransit');
-transitics = cg(c,'lm.transit');
-manifold = cg(c,'lm.manifold');
-
-periods = 1;
-timescale = periods * 2*pi;
-numPts = 2;
-
-figure
-hold on
-for i = 1:size(nontransitics,2)
-    [~,c] = energyplot(linspace(0,timescale,numPts),...
-                      nontransitics(:,i),c,H2energy,false,'b');
-    [~,c] = energyplot(linspace(0,-timescale,numPts),...
-                      nontransitics(:,i),c,H2energy,false,'b');              
-end
-for i = 1:size(transitics,2)
-    [~,c] = energyplot(linspace(0,timescale,numPts),...
-                      transitics(:,i),c,H2energy,false,'y');
-    [~,c] = energyplot(linspace(0,-timescale,numPts),...
-                      transitics(:,i),c,H2energy,false,'y');
-end
-for i = 1:size(manifold,2)
-    [~,c] = energyplot(linspace(0,timescale,numPts),...
-                      manifold(:,i),c,H2energy,false,'r');
-    [~,c] = energyplot(linspace(0,-timescale,numPts),...
-                      manifold(:,i),c,H2energy,false,'r');
-end
-
-xticks(linspace(-timescale,timescale,2*numPts-1));
-
-disp('CONDITION 3:')
-disp('Assess to see whether it holds visually.')
-disp('------------')
+% %%
+% %Now, we plot the trajectory energies. We have to move back to the
+% %symplectic eigenbasis to do so, which in turn requires restarting the
+% %cache.
+% 
+% c = coordset(c,eigenbasis);
+% 
+% c = startCaching(c);
+% 
+% nontransitics = cg(c,'lm.nontransit');
+% transitics = cg(c,'lm.transit');
+% manifold = cg(c,'lm.manifold');
+% 
+% periods = 1;
+% timescale = periods * 2*pi;
+% numPts = 2;
+% 
+% figure
+% hold on
+% for i = 1:size(nontransitics,2)
+%     [~,c] = energyplot(linspace(0,timescale,numPts),...
+%                       nontransitics(:,i),c,H2energy,false,'c');
+%     [~,c] = energyplot(linspace(0,-timescale,numPts),...
+%                       nontransitics(:,i),c,H2energy,false,'c');              
+% end
+% for i = 1:size(transitics,2)
+%     [~,c] = energyplot(linspace(0,timescale,numPts),...
+%                       transitics(:,i),c,H2energy,false,'g');
+%     [~,c] = energyplot(linspace(0,-timescale,numPts),...
+%                       transitics(:,i),c,H2energy,false,'g');
+% end
+% for i = 1:size(manifold,2)
+%     [~,c] = energyplot(linspace(0,timescale,numPts),...
+%                       manifold(:,i),c,H2energy,false,'r');
+%     [~,c] = energyplot(linspace(0,-timescale,numPts),...
+%                       manifold(:,i),c,H2energy,false,'r');
+% end
+% 
+% xticks(linspace(-timescale,timescale,2*numPts-1));
+% 
+% disp('CONDITION 3:')
+% disp('Assess to see whether it holds visually.')
+% disp('------------')
 
 c = stopCaching(c);
