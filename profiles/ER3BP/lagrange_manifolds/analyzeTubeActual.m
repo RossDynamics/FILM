@@ -1,6 +1,6 @@
 %Used for analyzing trajectories with components on the center manifold
 %using the symplectic eigenbasis.
-%Run analyzeMonodromy and analyzeTransit first.
+%Run analyzeMonodromyER3BP and analyzeTransitER3BP first.
 
 %Let's set the eigenbasis first
 c = coordset(c,eigenbasis);
@@ -8,8 +8,6 @@ c = coordset(c,eigenbasis);
 %We get the transit initial conditions and then create a circle with radius
 %equal to the distance of the default center manifold points to the origin
 transit = cg(c,'lm.transit');
-
-n = 20;
 
 coords = [];
 for i = 1:size(transit,2)
@@ -23,18 +21,16 @@ for i = 1:size(transit,2)
     %
     % circSize = 1e-4;
     
+    n = 80;
+    
     circ = circSize * onesphere(n);
     
-    coords = [coords [q1coord * ones(n,1) circ(:,1) p1coord * ones(n,1) circ(:,2)].'];
+    coords = [coords [q1coord * ones(n,1) circ(:,1) p1coord * ones(n,1) circ(:,2) zeros(n,1)].'];
 end
 
 c = cs(c,'s.o.v.dmode','2');
 close all;
-hold on;
-for i = 1:size(transit,2)
-    pltpts = [coords(:,((i-1)*n+1):(i*n)) coords(:,(i-1)*n+1)]
-    plot3(pltpts(1,:),pltpts(2,:),pltpts(4,:),'-b')
-end
+cplot(coords,c,'.b');
 c = cs(c,'s.o.v.dmode','position');
 
 coordget(c)
@@ -55,7 +51,7 @@ c = startCaching(c);
 periods = 1;
 numPts = 2;
 
-tspan = linspace(0,periods * getSolarPeriod(c),numPts);
+tspan = linspace(0,periods * 2*pi,numPts);
 
 figure
 hold on 
@@ -69,26 +65,16 @@ for i = 1:size(tubecoords,2)
     fdcoords = [fdcoords yfd(:,end)];
 end
 
-for i = 1:size(transit,2)
-    pltpts = [tubecoords(:,((i-1)*n+1):(i*n)) tubecoords(:,(i-1)*n+1)]
-    plot3(pltpts(1,:),pltpts(2,:),pltpts(4,:),'-b')
-end
-
-for i = 1:size(transit,2)
-    pltpts = [fdcoords(:,((i-1)*n+1):(i*n)) fdcoords(:,(i-1)*n+1)]
-    p = plot3(pltpts(1,:),pltpts(2,:),pltpts(4,:),'-b')
-    p.Color(4) = 0.25;
-end
+p = cplot(fdcoords,c,'b.');
+p.Color(4) = 0.25;
 
 set(gca,'FontSize',20)
 xlabel('$x$','interpreter','latex')
 ylabel('$y$','interpreter','latex')
-zlabel('$p_x$','interpreter','latex')
 axis square
 axis equal
 
-%figure;
-hold on;
+figure;
 
 %fdshp1.Alpha = Inf;
 %fdshp2 = alphaShape(fdcoords(2,:)',fdcoords(4,:)');
@@ -102,19 +88,12 @@ for i = 1:size(tubecoords,2)
     bdcoords = [bdcoords ybd(:,end)];
 end
 
-% p = cplot(bdcoords,c,'b.');
-% p.Color(4) = 0.25;
-
-for i = 1:size(transit,2)
-    pltpts = [bdcoords(:,((i-1)*n+1):(i*n)) bdcoords(:,(i-1)*n+1)]
-    p = plot3(pltpts(1,:),pltpts(2,:),pltpts(4,:),'-b')
-    p.Color(4) = 0.25;
-end
+p = cplot(bdcoords,c,'b.');
+p.Color(4) = 0.25;
 
 set(gca,'FontSize',20)
 xlabel('$x$','interpreter','latex')
 ylabel('$y$','interpreter','latex')
-zlabel('$p_x$','interpreter','latex')
 axis square
 axis equal
 
