@@ -19,7 +19,9 @@ n = cg(c,'d.n');
 y0 = getIC(roiSet,extendedy0);
 
 tspan = linspace(0,T,nPoints);
+
 sol = integ(tspan,y0,c);
+
 try
     y = deval(sol,tspan);
 catch exception
@@ -29,6 +31,8 @@ catch exception
         tspan = linspace(0,sol.x(end),nPoints);
         y = deval(sol,tspan);
         disp('Unable to integrate over the full timespan required.')
+    else
+        rethrow(exception)
     end
 end
 
@@ -47,6 +51,7 @@ for i = 1:nhalf
     p.Tag = 'delete';
     
     cplot(y0,c,'ok');
+    
 end
 
 %We get the tolerance by calculating the distance between the start and end
