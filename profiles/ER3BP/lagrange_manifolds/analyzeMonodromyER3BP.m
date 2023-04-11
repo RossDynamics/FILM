@@ -14,7 +14,7 @@ c = useMomentum(c);
 disp('Obtaining the monodromy matrix...')
 %We now obtain the monodromy matrix (the state transition matrix after one
 %period)
-stms = stm([0 2*pi],cg(c,'lm.y0'),c);
+stms = stm(linspace(0,2*pi,3),mp(cg(c,'lm.y0'),15),c);
 M = stms(1:4,1:4,2);
 c = cs(c,'lm.monodromy',M,2);
 Mfull = stms(:,:,2);

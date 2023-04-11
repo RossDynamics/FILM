@@ -16,7 +16,7 @@ c = useMomentum(c);
 disp('Obtaining the monodromy matrix...')
 %We now obtain the monodromy matrix (the state transition matrix after one
 %period)
-stms = stm([0 getSolarPeriod(c)],cg(c,'lm.y0'),c);
+stms = stm([0 getSolarPeriod(c)],mp(cg(c,'lm.y0')),c);
 c = cs(c,'lm.monodromy',stms(:,:,2),2);
 
 disp('Monodromy matrix M:')
@@ -79,4 +79,4 @@ c = cs(c,'p.a',a(1));
 
 c = cs(c,'p.T',getSolarPeriod(c));
 
-H2energy = getEnergyHandle(c,cg(c,'lm.H2'));
+H2energy = getEnergyHandle(c,H2);

@@ -6,8 +6,9 @@ function y0 = getIC(roiSet,extensions)
 nhalf = numel(roiSet);
 
 %We first construct the initial condition from all of the separate axes
-y0([1,4],:) = roiSet{1}.Position.';
-y0([2,3],:) = roiSet{2}.Position.';
+for i = 1:nhalf
+    y0([i,nhalf+i],:) = roiSet{i}.Position.';
+end
 
 y0 = [y0; extensions];
 end

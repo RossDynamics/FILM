@@ -1,30 +1,31 @@
-%Used for analyzing transit using the symplectic eigenbasis.
-%Run analyzeMonodromy or analyzeMonodromyER3BP first.
+%Used for analyzing transit using the symplectic eigenbasis, but going
+%backwards. Run analyzeMonodromy or analyzeMonodromyER3BP first--
+%this code is designed to work with both the BCM and the ER3BP.
 
 %model = "BCM"
-model = "ER3BP";
+model = "ER3BP"
 
 %Change depending on the model:
 switch model
     case "BCM"
         period = getSolarPeriod(c) 
         conststart = mp(1e-7);
-        constend = mp(7e-6);
+        constend = mp(4.9e-6);
         h = mp(1e-13);
         k = mp(1e-10);
         
     case "ER3BP"
         period = 2*pi
-        conststart = mp(1e-7);
-        constend = mp(5e-6);
+        conststart = mp(1e-8);
+        constend = mp(5e-7);
         h = mp(1e-14);
-        k = mp(1e-10);
+        k = mp(1e-7);
 end
 
 %To consider initial conditions in the upper halfplane, set halfplane equal
 %to 1. To consider initial conditions in the lower halfplane, set
 %halfplane equal to -1.
-halfplane = 1;
+halfplane = -1;
 
 %We create an array of initial conditions from within the
 %symplectic eigenbasis along the bounding line. We set const (where p1 =
@@ -38,17 +39,17 @@ halfplane = 1;
 %result, set k = 1 for the standard case.
 
 %Current explanation of k:
-%All q1's are generated from -k to k.
+%All p1's are generated from -k to k.
 
 c = coordreset(c);
 c = useMomentum(c);
 
-% %We get the quadratic map. It is faster if we try to compute it within the
+%We get the quadratic map. It is faster if we try to compute it within the
 % %standard momentum frame and then include conversion functionality manually
 % disp('Computing phi')
 % c = cs(c,'s.i.odeopts',odeset('OutputFcn',@odeprint,'RelTol',...
 %                               3e-14,'AbsTol',1e-15));
-% [phi,~,~] = stm(linspace(0,period,10),mp(cg(c,'lm.y0')),c,[],2);
+% [phi,~,~] = stm(linspace(0,-period,10),mp(cg(c,'lm.y0')),c,[],2);
 % c = cs(c,'s.i.odeopts',odeset('OutputFcn',[],'RelTol',...
 %                               3e-14,'AbsTol',1e-15));
 % disp('Done computing phi')
@@ -75,8 +76,8 @@ c = coordset(c,eigenbasis);
 
 numConsts = 30;
 numPoints = 100;
-%numConsts = 10;
-%numPoints = 10;
+% numConsts = 10;
+% numPoints = 10;
 
 constarray = linspace(halfplane*conststart,halfplane*constend,numConsts)';
 %constarray = halfplane.*logspace(-10,-7,numConsts)';
@@ -90,10 +91,11 @@ for j = 1:numConsts
         
         
         %q1array = linspace(-constarray(j) / (k + 1),constarray(j)/(k-1),numPoints);
-        q1array = linspace(-k,k,numPoints);
+        p1array = linspace(-k,k,numPoints);
         
-        ic = ics_energy_boundary(q1array(i),constarray(j),h,...
-                                   cg(c,'p.sigma'),cg(c,'p.a'),cg(c,'p.T'));
+        ic = ics_energy_boundary(p1array(i),constarray(j),h,...
+                                   cg(c,'p.sigma'),cg(c,'p.a'),...
+                                   cg(c,'p.T'),true);
         %If we get complex values, we know we've reached the boundary,
         %and so we break and leave all remaining entries (including this one)
         %as NaN's
@@ -107,10 +109,6 @@ for j = 1:numConsts
                                                zeros(getnExtended(c)-4,1)];
         arrayicsfdlin(:,i + (j - 1)*numPoints) = [lin(ic)
                                                zeros(getnExtended(c)-4,1)];
-
-%         arrayics(:,i + (j - 1)*numPoints) = ic;
-%         arrayicsfd(:,i + (j - 1)*numPoints) = quadrat(ic);
-%         arrayicsfdlin(:,i + (j - 1)*numPoints) = lin(ic);
     end
 end
 
@@ -132,7 +130,7 @@ disp('------------')
 %divergence rates are very high. We also have to determine whether to use
 %the q_1 > 0 / q_1 < 0 or p_1 > 0 / p_1 < 0 halfplanes, based on whether
 %we're going forwards or backwards.
-hp = 1;
+hp = 3;
 c = cs(c,'lm.nontransit',arrayics(:,arrayicsfd(hp,:) * halfplane < -eps('mp')));
 c = cs(c,'lm.transit',arrayics(:,arrayicsfd(hp,:) * halfplane > eps('mp')));
 c = cs(c,'lm.manifold',arrayics(:,abs(arrayicsfd(hp,:)) < eps('mp')));
@@ -175,7 +173,7 @@ ylabel('$p_1$','interpreter','latex')
 axis([-0.1 0.75 -0.1 0.75]*1e-3)
 
 numPeriods = 1;
-timescale = numPeriods * period;
+timescale = -numPeriods * period;
 numPts = 5;
 
 % nontransitics = cg(c,'lm.nontransit');
@@ -191,7 +189,7 @@ c = useMomentum(c);
 %Now, we integrate. For speed, we enable caching.
 c = startCaching(c);
 
-timescale = 2 * period;
+timescale = -2 * period;
 numPts = 1000;
 
 nontransitics = double(cg(c,'lm.nontransit'));

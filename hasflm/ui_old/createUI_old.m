@@ -2,9 +2,7 @@ function [axisSet,roiSet,tolLabel] = createUI(c,varargin)
 %CREATEUI Creates a HASFLM UI for the context object c. Returns cell arrays
 %containing the axes and roi points created. Also returns UI
 %elements. Will take initial conditions for phase space extensions as an
-%optional argument. This version of the UI has been rewritten to be more
-%restrictive but efficient; it is designed only to find initial conditions
-%of the form (q1,0,0,p2).
+%optional argument.
 
 %We need to know the unextended phase space dimension so that we can know 
 %how many axes to create
@@ -15,27 +13,20 @@ close all;
 tiledlayout('flow');
 
 %We first create axes and ROI objects
-axisSet{1} = nexttile;
+for i = 1:n/2
+    axisSet{i} = nexttile;
     
-title('$q_1, \dot{q}_2$ or $q_1, p_2$','Interpreter','latex')
-
-%We obtain a drawpoint and add a listener
-roiSet{1} = drawpoint('Position',[0 0]);
-
-axis(1e-1*[-1 1 -1 1]);
-
-hold on;
-
-axisSet{2} = nexttile;
+    title(['$q_' int2str(i) ', \dot{q}_' int2str(i) '$ or ' ...
+           '$q_' int2str(i) ', p_' int2str(i) '$'],'Interpreter','latex')
     
-title('$q_2, \dot{q}_1$ or $q_2, p_1$','Interpreter','latex')
-
-%We obtain a drawpoint and add a listener
-roiSet{2} = drawpoint('Position',[0 0]);
-
-axis(1e-1*[-1 1 -1 1]);
-
-hold on;
+    %We obtain a drawpoint and add a listener
+    roiSet{i} = drawpoint('Position',[0 0]);
+    
+    axis(1e-1*[-1 1 -1 1]);
+    
+    hold on;
+    
+end
 
 %We now create a special axis, the statusAxis, for viewing data
 statusAxis = nexttile([1 2]);

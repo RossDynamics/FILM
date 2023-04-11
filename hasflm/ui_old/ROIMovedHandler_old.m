@@ -37,10 +37,9 @@ catch exception
 end
 
 %We now plot on each axis.
-modes = ["1-4" "2-3"];
-for i = 1:2
+for i = 1:nhalf
     %We make sure to change the current axes and dimension mode
-    c = cs(c,'s.o.v.dmode',modes(i));
+    c = cs(c,'s.o.v.dmode',int2str(i));
     
     currentAxis = axisSet{i};
     axes(currentAxis);
@@ -58,6 +57,7 @@ end
 %We get the tolerance by calculating the distance between the start and end
 %points on the trajectory, not counting extended phase space points
 tolLabel.String = norm(y(1:n,1) - y(1:n,end));
+
 
 end
 

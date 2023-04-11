@@ -26,7 +26,15 @@ q1p1Pts = [reshape(q1Pts,1,[])
                
 startPts = zeros(4,numel(q1Pts));
 startPts(canPlane,:) = q1p1Pts(1,:);
-startPts(canPlane+cg(c,'d.n')/2,:) = q1p1Pts(2,:);
+%startPts(canPlane+cg(c,'d.n')/2,:) = q1p1Pts(2,:);
+
+% [q1Pts,q2Pts,p2Pts] = meshgrid(linspace(-1,1,pointDensity),...
+%                          linspace(-1,1,pointDensity),...
+%                          linspace(-1,1,pointDensity));
+% startPts = [reshape(q1Pts,1,[])
+%             reshape(q2Pts,1,[])
+%             zeros(1,numel(q1Pts))
+%             reshape(p2Pts,1,[])];
 
 epsilon = 1e-12;
 
